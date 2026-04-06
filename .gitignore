@@ -16,6 +16,7 @@ ENV/
 .ipynb_checkpoints/
 *.nbconvert.ipynb
 kaggle_s6e4_irrigation.executed.ipynb
+kaggle_s6e4_irrigation.local.ipynb
 
 # ── Kaggle data (zu groß für Git) ──
 train.csv
