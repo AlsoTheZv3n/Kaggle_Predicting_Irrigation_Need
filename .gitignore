@@ -1,0 +1,56 @@
+# ── Python ──
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+env/
+ENV/
+
+# ── Jupyter ──
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+kaggle_s6e4_irrigation.executed.ipynb
+
+# ── Kaggle data (zu groß für Git) ──
+train.csv
+test.csv
+*.zip
+data/
+input/
+
+# ── Modell-Outputs ──
+submission.csv
+submission_*.csv
+*.pkl
+*.joblib
+*.cbm
+*.lgb
+*.model
+catboost_info/
+lightgbm_info/
+
+# ── Optuna ──
+*.db
+*.sqlite
+optuna_studies/
+
+# ── IDE / Editor ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+Task.md
+
+# ── Logs / Temp ──
+*.log
+tmp/
+temp/
