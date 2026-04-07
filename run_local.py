@@ -1,6 +1,6 @@
 """
 Lokaler End-to-End-Lauf des Notebooks mit den echten Kaggle-Daten.
-Nutzt den .venv-Kernel.
+Patcht das Run-Profil auf "Schnell" damit der Test in <30 min durchläuft.
 """
 import sys, os, time
 import nbformat
@@ -10,11 +10,31 @@ from nbclient.exceptions import CellExecutionError
 NB_IN  = "kaggle_s6e4_irrigation.ipynb"
 NB_OUT = "kaggle_s6e4_irrigation.local.ipynb"
 
+# Schnell-Profil für lokalen Test
+PATCHES = [
+    ("SEEDS    = [42, 2024]",       "SEEDS    = [42]"),
+    ("N_SPLITS = 5",                "N_SPLITS = 3"),
+    ("N_ITERS  = 1500",             "N_ITERS  = 500"),
+    ("PSEUDO_CONF_THRESHOLD = 0.95", "PSEUDO_CONF_THRESHOLD = 0.95"),
+]
+
 def main():
     nb = nbformat.read(NB_IN, as_version=4)
     print(f"Loaded {NB_IN}: {len(nb.cells)} cells")
 
-    client = NotebookClient(nb, timeout=1800, kernel_name="kaggle-s6e4")
+    patched = 0
+    for cell in nb.cells:
+        if cell.cell_type != "code":
+            continue
+        new_src = cell.source
+        for old, new in PATCHES:
+            if old in new_src:
+                new_src = new_src.replace(old, new)
+                patched += 1
+        cell.source = new_src
+    print(f"✓ {patched} patches applied (Schnell-Profil)")
+
+    client = NotebookClient(nb, timeout=3600, kernel_name="kaggle-s6e4")
     t0 = time.time()
     try:
         client.execute()
@@ -27,7 +47,7 @@ def main():
             for o in c.get("outputs", []):
                 if o.get("output_type") == "error":
                     print(f"\n--- Cell {i} ERROR ---")
-                    print("\n".join(o.get("traceback", []))[-2500:])
+                    print("\n".join(o.get("traceback", []))[-3000:])
         sys.exit(1)
     dt = time.time() - t0
     print(f"\n✅ Notebook executed in {dt/60:.1f} min")
@@ -43,9 +63,12 @@ def main():
                 if any(k in txt for k in ["BalAcc", "OOF", "Optimal", "Ensemble",
                                            "submission", "scaling", "weights",
                                            "Train", "Test", "Features", "DATA_DIR",
-                                           "Class mapping", "Neue Features"]):
+                                           "Class mapping", "Pseudo", "Round",
+                                           "is_generated", "External", "LGB seed",
+                                           "CB seed", "XGB seed", "Round 1",
+                                           "Round 2", "Augmented", "Final"]):
                     print(f"\n--- Cell {i} ---")
-                    print(txt.rstrip()[:1500])
+                    print(txt.rstrip()[:2500])
 
     if os.path.exists("submission.csv"):
         import pandas as pd
